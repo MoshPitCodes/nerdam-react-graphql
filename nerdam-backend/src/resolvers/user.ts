@@ -5,6 +5,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from "type-graphql";
 import { User } from "../entities/User";
@@ -44,12 +45,26 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   /* -------------------------
+  Check if user is logged in
+  ------------------------- */
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req, em }: MyContext) {
+    /// not logged in
+    if (!req.session.userId) {
+      return null;
+    }
+
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
+  /* -------------------------
   Register new user
   ------------------------- */
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
     // If username is too short
     if (options.username.length < 3) {
@@ -96,6 +111,10 @@ export class UserResolver {
     // All good? Then save user
     await em.persistAndFlush(user);
 
+    // store userId in session
+    // this will setin session on the user client
+    req.session!.userId = user.id;
+
     return { user };
   }
 
@@ -105,7 +124,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, {
       username: options.username.toLowerCase(),
@@ -135,6 +154,11 @@ export class UserResolver {
         ],
       };
     }
+
+    // store userId in session
+    // this will setin session on the user client
+    req.session!.userId = user.id;
+
     return { user };
   }
 }
