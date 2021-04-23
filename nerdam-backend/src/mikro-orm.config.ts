@@ -2,6 +2,7 @@ import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
 import { MikroORM } from "@mikro-orm/core";
 import path from "path";
+import { User } from "./entities/User";
 
 export default {
   migrations: {
@@ -15,7 +16,7 @@ export default {
     safe: false, // allow to disable table and column dropping
     emit: "ts", // migration generation mode
   },
-  entities: [Post],
+  entities: [Post, User],
   dbName: "nerdam",
   user: "postgres",
   password: "",

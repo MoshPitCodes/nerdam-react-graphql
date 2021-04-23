@@ -9,6 +9,7 @@ import { buildSchema } from "type-graphql";
 // import Type-GraphQL Resolvers
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
 
 // Main App Setup
 const main = async () => {
@@ -24,7 +25,7 @@ const main = async () => {
   // ApolloServer setup
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
     context: () => ({ em: orm.em }),
